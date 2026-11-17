@@ -610,6 +610,8 @@ func (s *shim) ready() error {
 			doing = bypassAsking
 		} else if strings.Contains(nowWords, "keep browser tools off") {
 			doing = chromeAsking
+		} else if strings.Contains(nowWords, "Resume this conversation?") {
+			doing = "asked whether to resume the inactive conversation, answering"
 		}
 		s.doing.Store(doing)
 		switch {
@@ -666,6 +668,14 @@ func (s *shim) ready() error {
 			}
 		case strings.Contains(words, "Choose the text style"):
 			if err := onboard("theme", "\r"); err != nil {
+				return err
+			}
+		case strings.Contains(words, "Resume this conversation?"):
+			// Claude Code's resume picker on an inactive session: option
+			// 1 (Resume) is the drawn choice; Enter confirms it, as a
+			// person would. Settled before the key like the onboarding
+			// screens.
+			if err := onboard("resume", "\r"); err != nil {
 				return err
 			}
 		case strings.Contains(p, "❯ "):
